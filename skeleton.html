@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Diagram Viewer</title>
+
+    <!-- bpmn-js script is injected via loadScript -->
+
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      }
+
+      html, body, #canvas {
+        height: 100%;
+        padding: 0;
+        margin: 0;
+      }
+
+      .footer {
+        position: absolute;
+        bottom: 15px;
+        left: 15px;
+      }
+
+      #title {
+        font-size: .85em;
+        color: #AAA;
+        font-weight: normal;
+        padding: 5px 0;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="canvas"></div>
+
+    <div class="footer">
+      <h4 id="title"></h4>
+    </div>
+
+    <script>
+      // viewer instance, lazily initialized
+      let bpmnViewer;
+
+      /**
+       * Get or create viewer instance.
+       *
+       * @return {BpmnViewer}
+       */
+      function getViewer() {
+
+        if (bpmnViewer) {
+          return bpmnViewer;
+        }
+
+        bpmnViewer = new BpmnJS({
+          container: '#canvas'
+        });
+
+        bpmnViewer.on('import.done', function(event) {
+
+          const error = event.error;
+          const warnings = event.warnings;
+
+          if (error) {
+            return console.error('could not import BPMN 2.0 diagram', error);
+          }
+
+          // zoom to fit full viewport
+          bpmnViewer.get('canvas').zoom('fit-viewport');
+        });
+
+        return bpmnViewer;
+      }
+
+      /**
+       * Open diagram in our viewer instance.
+       *
+       * @param {String} bpmnXML diagram to display
+       * @param {Object} [options]
+       * @param {Dimensions} [options.minDimensions]
+       *
+       * @return {Promise<Bounds, Error>}
+       */
+      async function openDiagram(bpmnXML, options) {
+
+        // viewer instance, lazily initialized
+        const bpmnViewer = getViewer();
+
+        options = options || {};
+
+        const minDimensions = options.minDimensions || {
+          width: 0,
+          height: 0
+        };
+
+        const title = options.title;
+
+        const footer = options.footer;
+
+        await bpmnViewer.importXML(bpmnXML);
+
+        const viewbox = bpmnViewer.get('canvas').viewbox();
+
+        // uses provided title
+        const titleNode = document.querySelector('#title');
+
+        if (title) {
+          titleNode.textContent = title;
+        }
+
+        titleNode.style.display = title ? 'block' : 'none';
+
+        const width = Math.max(viewbox.inner.width, minDimensions.width);
+        const diagramHeight = Math.max(
+          viewbox.inner.height + (footer ? 90 : 0),
+          minDimensions.height
+        );
+
+        return {
+          width,
+          height: diagramHeight + (footer ? 0 : 90),
+          diagramHeight
+        };
+      }
+
+      /**
+       * Resize to viewport
+       */
+      async function resize() {
+        const bpmnViewer = getViewer();
+
+        const canvas = bpmnViewer.get('canvas');
+
+        canvas.resized();
+
+        canvas.zoom('fit-viewport');
+
+        /* HERE BE DRAGONS */
+      }
+
+      async function toSVG() {
+        const bpmnViewer = getViewer();
+
+        const {
+          svg
+        } = await bpmnViewer.saveSVG();
+
+        return svg;
+      }
+
+      /**
+       * Load the script that provides the BpmnJS global
+       *
+       * @param  {String} src
+       *
+       * @return {Promise<Void>}
+       */
+      function loadScript(src) {
+        const head = document.head;
+        const script = document.createElement('script');
+
+        script.type = 'text/javascript';
+        script.charset = 'utf8';
+        script.src = src;
+
+        const promise = new Promise((resolve, reject) => {
+
+          function callback(fn) {
+            return (arg) => {
+              script.onload = script.onerror = null;
+              return fn(arg);
+            };
+          }
+
+          script.onload = callback(resolve);
+          script.onerror = callback(reject);
+        });
+
+        head.appendChild(script);
+
+        return promise;
+      }
+    </script>
+  </body>
+</html>

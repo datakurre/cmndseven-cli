@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "cmndseven-cli"
+version = "0.1.0"
+description = "Opinionated Camunda Platform 7 CLI"
+authors = ["Asko Soukka <asko.soukka@iki.fi>"]
+license = "Apache-2"
+readme = "README.md"
+packages = [{include = "cmndseven_cli"}]
+
+[tool.poetry.scripts]
+ccli = "cmndseven_cli:main"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+click = "^8.1.3"
+generic-camunda-client = "^7.18.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

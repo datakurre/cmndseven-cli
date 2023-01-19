@@ -1,0 +1,118 @@
+{
+  "nodes": {
+    "bpmn-to-image": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1636373941,
+        "narHash": "sha256-vtbcvguZ9mGxQNn/j4dgEFZ66FEVp6qbkis/eSE3v+A=",
+        "owner": "bpmn-io",
+        "repo": "bpmn-to-image",
+        "rev": "af29f4b63fbeb4f0b974d31c687732e5be6652da",
+        "type": "github"
+      },
+      "original": {
+        "owner": "bpmn-io",
+        "repo": "bpmn-to-image",
+        "type": "github"
+      }
+    },
+    "flake-utils": {
+      "locked": {
+        "lastModified": 1667395993,
+        "narHash": "sha256-nuEHfE/LcWyuSWnS8t12N1wc105Qtau+/OdUAjtQ0rA=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "5aed5285a952e0b949eb3ba02c12fa4fcfef535f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1674091526,
+        "narHash": "sha256-eLhLKOpF1ix5xZeFF9g8uE1stdyxuBLJvWQ20gLbDto=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "fc5b90fd72177d9bcf435b10c12bb943549748c6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "release-22.11",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "npmlock2nix": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1673447413,
+        "narHash": "sha256-sJM82Sj8yfQYs9axEmGZ9Evzdv/kDcI9sddqJ45frrU=",
+        "owner": "nix-community",
+        "repo": "npmlock2nix",
+        "rev": "9197bbf397d76059a76310523d45df10d2e4ca81",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "npmlock2nix",
+        "type": "github"
+      }
+    },
+    "poetry2nix": {
+      "inputs": {
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1673926875,
+        "narHash": "sha256-QOsT76Al0Igpo0u5vtQJuDSOxrocX3sTD523pLPEklc=",
+        "owner": "nix-community",
+        "repo": "poetry2nix",
+        "rev": "a5c454a834cd290dd4d33102ab8b4aa37d850e65",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "poetry2nix",
+        "type": "github"
+      }
+    },
+    "robot-task": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1671908169,
+        "narHash": "sha256-+buHqx+zYW4lFiM9cBjYPNssYICKa0tBTxJq83fHSrg=",
+        "owner": "datakurre",
+        "repo": "camunda-modeler-robot-plugin",
+        "rev": "7a70112bb9cd72713823003bb13101f44a7bc67c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "datakurre",
+        "repo": "camunda-modeler-robot-plugin",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "bpmn-to-image": "bpmn-to-image",
+        "flake-utils": "flake-utils",
+        "nixpkgs": "nixpkgs",
+        "npmlock2nix": "npmlock2nix",
+        "poetry2nix": "poetry2nix",
+        "robot-task": "robot-task"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
