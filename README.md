@@ -37,7 +37,7 @@ export CAMUNDA_AUTHORIZATION="Basic ZGVtbzpkZW1v"
 
 ## Usage with RCC
 
-If you already have Chrome or Chromium, there is a good chances to get `ccli` running
+If you already have Chrome or Chromium, there is a good chance to get `ccli` running
 also with [Robocorp RCC](https://downloads.robocorp.com/rcc/releases/index.html), with
 the following `conda.yaml`:
 
@@ -63,7 +63,7 @@ condaConfigFile: conda.yaml
 artifactsDir: .
 ```
 
-And then, simply:
+And then:
 
 ```
 rcc --silent run -- --help
