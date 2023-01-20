@@ -2,6 +2,13 @@
 
 A placeholder project for to be opinionated Camunda Platform 7 CLI.
 
+
+## Requirements
+
+Use of `ccli` to render BPMN diagrams require NodeJS (`node`) and Chrome
+(`chrome`) or Chromium (`chromium`) browser on the current system path.
+
+
 ## Usage
 
 ```
