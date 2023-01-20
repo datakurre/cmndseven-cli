@@ -64,12 +64,17 @@ def render_instance(instance_id, output_path):
         incidents = api_incidents.get_incidents(
             process_instance_id=instance_id,
         )
-        with PlainTextApiClient(configuration) as job_api_client:
-            api_job = generic_camunda_client.JobApi(job_api_client)
+        with PlainTextApiClient(configuration) as text_api_client:
+            api_job = generic_camunda_client.JobApi(text_api_client)
+            api_task = generic_camunda_client.ExternalTaskApi(text_api_client)
             stacktraces = {
                 incident.activity_id: api_job.get_stacktrace(
                     id=incident.configuration,
-                )
+                ) if incident.incident_type == "failedJob" else
+                api_task.get_external_task_error_details(
+                    id=incident.configuration,
+                ) if incident.incident_type == "failedExternalTask" else
+                ""
                 for incident in incidents
             }
         activities_json = json.dumps(
