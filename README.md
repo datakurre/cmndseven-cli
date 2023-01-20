@@ -33,3 +33,38 @@ could be set with:
 ```
 export CAMUNDA_AUTHORIZATION="Basic ZGVtbzpkZW1v"
 ```
+
+
+## Usage with RCC
+
+If you already have Chrome or Chromium, there is a good chances to get `ccli` running
+also with [Robocorp RCC](https://downloads.robocorp.com/rcc/releases/index.html), with
+the following `conda.yaml`:
+
+```yaml
+channels:
+  - conda-forge
+
+dependencies:
+  - nodejs
+  - python
+  - pip
+  - pip:
+    - cmndseven-cli==0.2.1
+```
+
+`robot.yaml`:
+
+```yaml
+tasks:
+  ccli:
+    shell: ccli
+condaConfigFile: conda.yaml
+artifactsDir: .
+```
+
+And then, simply:
+
+```
+rcc --silent run -- --help
+```
