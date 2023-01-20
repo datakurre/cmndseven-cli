@@ -17,7 +17,6 @@ ASSETS = [
     Path(__file__).parent / "assets" / "index.js",
     Path(__file__).parent / "assets" / "bpmn-viewer.production.min.js",
     Path(__file__).parent / "assets" / "puppeteer.production.min.js",
-    Path(__file__).parent / "assets" / "skeleton.html",
 ]
 
 NODEJS_EXECUTABLE_PATH = str(shutil.which("node"))
@@ -167,7 +166,9 @@ def render_instance(instance_id: str, output_path: str):
                 shutil.copy(str(asset), tmpdirname)
             skeleton_html = Path(tmpdirname) / "skeleton.html"
             skeleton_html.write_text(
-                skeleton_html.read_text().replace("/* PLACEHOLDER */", inject)
+                (Path(__file__).parent / "assets" / "skeleton.html")
+                .read_text()
+                .replace("/* PLACEHOLDER */", inject)
             )
             subprocess.call(
                 [NODEJS_EXECUTABLE_PATH, str(tmpdirname)],
