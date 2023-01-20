@@ -9,6 +9,8 @@ const {
   readFileSync
 } = require('fs');
 
+const fs = require('fs');
+
 require('./puppeteer.production.min.js');
 
 async function printDiagram(page, options) {
@@ -97,7 +99,7 @@ async function withPage(fn) {
   let browser;
 
   try {
-    browser = await puppeteer.launch({executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || 'chromium'});
+    browser = await puppeteer.launch({executablePath: process.env.PUPPETEER_EXECUTABLE_PATH});
     await fn(await browser.newPage());
   } finally {
     if (browser) {
@@ -148,5 +150,6 @@ async function convert(input, output) {
   ]);
 }
 
+// PNG is required for capturing HTML annotations outside SVG layer
 convert(resolve(__dirname, "input.bpmn"), resolve(__dirname, "output.png"));
 

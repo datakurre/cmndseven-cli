@@ -1,0 +1,38 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>${title}</title>
+  <style>
+    th { vertical-align: top; text-align: left; }
+    th, td { padding: 1ex 1em 1ex 1em; }
+  </style>
+</head>
+<body>
+  <img alt="" src="${src}" width="100%" />
+  <table title="Incidents" tal:condition="incidents|nothing">
+    <tbody>
+      <tal:repeat repeat="incident incidents">
+        <tr><th>Message</th><td>${incident["message"]}</td></tr>
+        <tr><th>Detail</th><td>${incident["detail"]}</td></tr>
+      </tal:repeat>
+    </tbody>
+  </table>
+  <table title="Variables" tal:condition="variables|nothing">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Value</th>
+        <th>Scope</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr tal:repeat="variable variables">
+        <td>${variable["name"]}</td>
+        <td>${variable["value"]}</td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+</html>
