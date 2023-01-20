@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cmndseven-cli"
-version = "0.2.0"
+version = "0.2.1"
 description = "Opinionated Camunda Platform 7 CLI"
 homepage = "https://github.com/datakurre/cmndseven-cli/"
 authors = ["Asko Soukka <asko.soukka@iki.fi>"]
