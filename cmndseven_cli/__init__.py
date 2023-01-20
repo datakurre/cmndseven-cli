@@ -70,11 +70,13 @@ def render_instance(instance_id, output_path):
             stacktraces = {
                 incident.activity_id: api_job.get_stacktrace(
                     id=incident.configuration,
-                ) if incident.incident_type == "failedJob" else
-                api_task.get_external_task_error_details(
+                )
+                if incident.incident_type == "failedJob"
+                else api_task.get_external_task_error_details(
                     id=incident.configuration,
-                ) if incident.incident_type == "failedExternalTask" else
-                ""
+                )
+                if incident.incident_type == "failedExternalTask"
+                else ""
                 for incident in incidents
             }
         activities_json = json.dumps(
