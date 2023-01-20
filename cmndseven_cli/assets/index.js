@@ -62,8 +62,6 @@ async function printDiagram(page, options) {
 
   for (const output of outputs) {
 
-    console.log(`writing ${output}`);
-
     if (output.endsWith('.pdf')) {
       await page.pdf({
         path: output,

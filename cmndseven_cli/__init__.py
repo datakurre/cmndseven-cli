@@ -25,7 +25,7 @@ def data_uri(mimetype: str, data: bytes):
     return "data:{};base64,{}".format(mimetype, base64.b64encode(data).decode("utf-8"))
 
 
-@click.group(help="Camunda Platform 7 CLI")
+@click.group(help="Opinionated Camunda Platform 7 CLI")
 def main():
     pass
 
@@ -37,7 +37,7 @@ def render_group():
 
 @click.command(name="instance")
 @click.argument("instance_id")
-@click.argument("output_path")
+@click.argument("output_path", default="-")
 def render_instance(instance_id, output_path):
     class PlainTextApiClient(generic_camunda_client.ApiClient):
         def select_header_accept(self, accepts):
@@ -133,8 +133,11 @@ def render_instance(instance_id, output_path):
                     }
                     for incident in incidents
                 ],
-            )
-            Path(output_path).write_text(html)
+            ).strip()
+            if output_path == "-":
+                print(html)
+            else:
+                Path(output_path).write_text(html)
 
 
 main.add_command(render_group)
