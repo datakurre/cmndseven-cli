@@ -764,14 +764,14 @@ jeepney = ">=0.6"
 
 [[package]]
 name = "setuptools"
-version = "66.1.0"
+version = "66.1.1"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
 category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "setuptools-66.1.0-py3-none-any.whl", hash = "sha256:fc19f9f62120a763300fd78e234b3cbd3417be098f08c156eaaf36420627e57b"},
-    {file = "setuptools-66.1.0.tar.gz", hash = "sha256:78a02bdea8a5cb66dec1c507598c443bcc75562817d2556c1a17f7a344615bb4"},
+    {file = "setuptools-66.1.1-py3-none-any.whl", hash = "sha256:6f590d76b713d5de4e49fe4fbca24474469f53c83632d5d0fd056f7ff7e8112b"},
+    {file = "setuptools-66.1.1.tar.gz", hash = "sha256:ac4008d396bc9cd983ea483cb7139c0240a07bbc74ffb6232fceffedc6cf03a8"},
 ]
 
 [package.extras]
@@ -886,4 +886,4 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "6799034f64960d90029bb098b90d0e62cdb72dc17f7114b02d287b43112135e8"
+content-hash = "93a985c92a849f2b7e122246a7f5e93e300ca83c79e6290030e06e3e8ad5682b"

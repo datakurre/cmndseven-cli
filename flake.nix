@@ -8,16 +8,25 @@
 
   # Systems
   outputs = { self, nixpkgs, flake-utils, poetry2nix, ... }: flake-utils.lib.eachDefaultSystem (system: let pkgs = import nixpkgs { inherit system; overlays = [ poetry2nix.overlay ]; }; in {
+    # Apps
+    apps.default = {
+        type = "app";
+        program = self.packages.${system}.default + "/bin/ccli";
+    };
 
     # Packages
-    #packages.camnunda-cli 
-
-    # Overlay
-    overlays.default = final: prev: {
-#     inherit (self.packages.${system})
-#     camunda-cli
-#     ;
-    };
+    packages.default = (pkgs.poetry2nix.mkPoetryApplication {
+      projectDir = ./.;
+      propagatedBuildInputs = [
+        pkgs.chromium
+        pkgs.nodejs
+      ];
+      overrides = pkgs.poetry2nix.overrides.withDefaults (self: super: {
+        generic-camunda-client = super.generic-camunda-client.overridePythonAttrs(old: {
+          buildInputs = old.buildInputs ++ [ self.setuptools ];
+        });
+      });
+    });
 
     # Shells
     devShells.default = pkgs.mkShell {
