@@ -1,15 +1,17 @@
 import base64
-import chameleon
+import chameleon  # type: ignore
 import click
-import generic_camunda_client
+import generic_camunda_client  # type: ignore
 import json
 import os
 import shutil
 import subprocess
 import tempfile
 import time
-from generic_camunda_client.rest import ApiException
+from generic_camunda_client.rest import ApiException  # type: ignore
 from pathlib import Path
+from typing import Dict
+from typing import List
 
 ASSETS = [
     Path(__file__).parent / "assets" / "index.js",
@@ -18,13 +20,17 @@ ASSETS = [
     Path(__file__).parent / "assets" / "skeleton.html",
 ]
 
-NODEJS_EXECUTABLE_PATH = shutil.which("node")
-PUPPETEER_EXECUTABLE_PATH = shutil.which("chrome") or shutil.which("chromium")
-GLOBAL_OPTIONS = {}
+NODEJS_EXECUTABLE_PATH = str(shutil.which("node"))
+PUPPETEER_EXECUTABLE_PATH = str(shutil.which("chrome") or shutil.which("chromium"))
+GLOBAL_OPTIONS: Dict[str, str] = {}
 
 
 class CamundaApiClient(generic_camunda_client.ApiClient):
+    """Patched generated client to support authentication."""
+
     def __init__(self, *args, **kwargs):
+        """Initialize client with global CLI options."""
+
         configuration = generic_camunda_client.Configuration(
             host=GLOBAL_OPTIONS["camunda_url"]
         )
@@ -36,7 +42,7 @@ class CamundaApiClient(generic_camunda_client.ApiClient):
 
 
 class PlainTextApiClient(CamundaApiClient):
-    def select_header_accept(self, accepts):
+    def select_header_accept(self, accepts: List[str]):
         return "text/plain"
 
 
@@ -47,7 +53,7 @@ def data_uri(mimetype: str, data: bytes):
 def camunda_url(*_, **kwargs):
     """Add `--url` header option to set Camunda REST API base URL."""
 
-    def callback(ctx, _, value):
+    def callback(ctx, _, value: str):
         if not value or ctx.resilient_parsing:
             return
         GLOBAL_OPTIONS["camunda_url"] = value
@@ -96,7 +102,7 @@ def render_group():
 @click.argument("output_path", default="-")
 @camunda_url()
 @camunda_authorization()
-def render_instance(instance_id, output_path):
+def render_instance(instance_id: str, output_path: str):
     with CamundaApiClient() as api_client:
         api_instance = generic_camunda_client.HistoricProcessInstanceApi(api_client)
         api_definition = generic_camunda_client.ProcessDefinitionApi(api_client)
@@ -164,7 +170,7 @@ def render_instance(instance_id, output_path):
                 skeleton_html.read_text().replace("/* PLACEHOLDER */", inject)
             )
             subprocess.call(
-                [NODEJS_EXECUTABLE_PATH, tmpdirname],
+                [NODEJS_EXECUTABLE_PATH, str(tmpdirname)],
                 env={"PUPPETEER_EXECUTABLE_PATH": PUPPETEER_EXECUTABLE_PATH},
             )
             time.sleep(1)
