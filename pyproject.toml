@@ -5,7 +5,18 @@ description = "Opinionated Camunda Platform 7 CLI"
 authors = ["Asko Soukka <asko.soukka@iki.fi>"]
 license = "Apache-2"
 readme = "README.md"
-packages = [{include = "cmndseven_cli"}]
+packages = [
+  { include = "cmndseven_cli" }
+]
+exclude = [
+  "cmndseven_cli/assets/*.cjs",
+  "cmndseven_cli/assets/*.cjs",
+  "cmndseven_cli/assets/*.json",
+  "cmndseven_cli/assets/*.mjs",
+  "cmndseven_cli/assets/bpmn-viewer.js",
+  "cmndseven_cli/assets/node_modules",
+  "cmndseven_cli/assets/puppeteer.js"
+]
 
 [tool.poetry.scripts]
 ccli = "cmndseven_cli:main"

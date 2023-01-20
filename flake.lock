@@ -1,21 +1,5 @@
 {
   "nodes": {
-    "bpmn-to-image": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1636373941,
-        "narHash": "sha256-vtbcvguZ9mGxQNn/j4dgEFZ66FEVp6qbkis/eSE3v+A=",
-        "owner": "bpmn-io",
-        "repo": "bpmn-to-image",
-        "rev": "af29f4b63fbeb4f0b974d31c687732e5be6652da",
-        "type": "github"
-      },
-      "original": {
-        "owner": "bpmn-io",
-        "repo": "bpmn-to-image",
-        "type": "github"
-      }
-    },
     "flake-utils": {
       "locked": {
         "lastModified": 1667395993,
@@ -47,22 +31,6 @@
         "type": "github"
       }
     },
-    "npmlock2nix": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1673447413,
-        "narHash": "sha256-sJM82Sj8yfQYs9axEmGZ9Evzdv/kDcI9sddqJ45frrU=",
-        "owner": "nix-community",
-        "repo": "npmlock2nix",
-        "rev": "9197bbf397d76059a76310523d45df10d2e4ca81",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-community",
-        "repo": "npmlock2nix",
-        "type": "github"
-      }
-    },
     "poetry2nix": {
       "inputs": {
         "flake-utils": [
@@ -86,30 +54,11 @@
         "type": "github"
       }
     },
-    "robot-task": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1671908169,
-        "narHash": "sha256-+buHqx+zYW4lFiM9cBjYPNssYICKa0tBTxJq83fHSrg=",
-        "owner": "datakurre",
-        "repo": "camunda-modeler-robot-plugin",
-        "rev": "7a70112bb9cd72713823003bb13101f44a7bc67c",
-        "type": "github"
-      },
-      "original": {
-        "owner": "datakurre",
-        "repo": "camunda-modeler-robot-plugin",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
-        "bpmn-to-image": "bpmn-to-image",
         "flake-utils": "flake-utils",
         "nixpkgs": "nixpkgs",
-        "npmlock2nix": "npmlock2nix",
-        "poetry2nix": "poetry2nix",
-        "robot-task": "robot-task"
+        "poetry2nix": "poetry2nix"
       }
     }
   },

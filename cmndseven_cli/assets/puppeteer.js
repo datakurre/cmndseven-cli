@@ -1,0 +1,1 @@
+global.puppeteer = require("puppeteer");

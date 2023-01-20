@@ -1,0 +1,20 @@
+{
+  "name": "bpmn-to-image",
+  "version": "0.6.1",
+  "description": "Convert a BPMN 2.0 diagrams to PDF, SVG or PNG images",
+  "author": "Nico Rehwaldt <https://github.com/nikku>",
+  "license": "MIT",
+  "dependencies": {
+    "bpmn-js": "^11.1.1",
+    "puppeteer": "^19.5.2"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^24.0.0",
+    "@rollup/plugin-json": "^6.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.1",
+    "@rollup/plugin-replace": "^5.0.2",
+    "rollup": "^3.10.0",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1"
+  }
+}

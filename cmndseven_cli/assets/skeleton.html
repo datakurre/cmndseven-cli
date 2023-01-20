@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+ <head>
+   <meta charset="UTF-8" />
+   <title>Diagram Viewer</title>
+
+   <!-- https://github.com/bpmn-io/bpmn-to-image -->
+   <!-- bpmn-js script is injected via loadScript -->
+
+   <style>
+     body {
+       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+     }
+
+     html, body, #canvas {
+       height: 100%;
+       padding: 0;
+       margin: 0;
+     }
+
+     .footer {
+       position: absolute;
+       bottom: 15px;
+       left: 15px;
+     }
+
+     #title {
+       font-size: .85em;
+       color: #AAA;
+       font-weight: normal;
+       padding: 5px 0;
+       margin: 0;
+     }
+   </style>
+ </head>
+ <body>
+   <div id="canvas"></div>
+
+   <div class="footer">
+     <h4 id="title"></h4>
+   </div>
+
+   <script>
+     // viewer instance, lazily initialized
+     let bpmnViewer;
+
+     /**
+      * Get or create viewer instance.
+      *
+       * @return {BpmnViewer}
+       */
+      function getViewer() {
+
+        if (bpmnViewer) {
+          return bpmnViewer;
+        }
+
+        bpmnViewer = new BpmnJS({
+          container: '#canvas', additionalModules: [
+            ModelingModule
+          ]
+        });
+
+        bpmnViewer.on('import.done', function(event) {
+
+          const error = event.error;
+          const warnings = event.warnings;
+
+          if (error) {
+            return console.error('could not import BPMN 2.0 diagram', error);
+          }
+
+          // zoom to fit full viewport
+          bpmnViewer.get('canvas').zoom('fit-viewport');
+        });
+
+        return bpmnViewer;
+      }
+
+      /**
+       * Open diagram in our viewer instance.
+       *
+       * @param {String} bpmnXML diagram to display
+       * @param {Object} [options]
+       * @param {Dimensions} [options.minDimensions]
+       *
+       * @return {Promise<Bounds, Error>}
+       */
+      async function openDiagram(bpmnXML, options) {
+
+        // viewer instance, lazily initialized
+        const bpmnViewer = getViewer();
+
+        options = options || {};
+
+        const minDimensions = options.minDimensions || {
+          width: 0,
+          height: 0
+        };
+
+        const title = options.title;
+
+        const footer = options.footer;
+
+        await bpmnViewer.importXML(bpmnXML);
+
+        const viewbox = bpmnViewer.get('canvas').viewbox();
+
+        // uses provided title
+        const titleNode = document.querySelector('#title');
+
+        if (title) {
+          titleNode.textContent = title;
+        }
+
+        titleNode.style.display = title ? 'block' : 'none';
+
+        const width = Math.max(viewbox.inner.width, minDimensions.width);
+        const diagramHeight = Math.max(
+          viewbox.inner.height + (footer ? 90 : 0),
+          minDimensions.height
+        );
+
+        return {
+          width,
+          height: diagramHeight + (footer ? 0 : 90),
+          diagramHeight
+        };
+      }
+
+      /**
+       * Resize to viewport
+       */
+      async function resize() {
+        const bpmnViewer = getViewer();
+
+        const canvas = bpmnViewer.get('canvas');
+
+        canvas.resized();
+
+        canvas.zoom('fit-viewport');
+
+        /* PLACEHOLDER */
+
+        await new Promise(r => setTimeout(r, 2000));
+
+      }
+
+      async function toSVG() {
+        const bpmnViewer = getViewer();
+
+        const {
+          svg
+        } = await bpmnViewer.saveSVG();
+
+        return svg;
+      }
+
+      /**
+       * Load the script that provides the BpmnJS global
+       *
+       * @param  {String} src
+       *
+       * @return {Promise<Void>}
+       */
+      function loadScript(src) {
+        const head = document.head;
+        const script = document.createElement('script');
+
+        script.type = 'text/javascript';
+        script.charset = 'utf8';
+        script.src = src;
+
+        const promise = new Promise((resolve, reject) => {
+
+          function callback(fn) {
+            return (arg) => {
+              script.onload = script.onerror = null;
+              return fn(arg);
+            };
+          }
+
+          script.onload = callback(resolve);
+          script.onerror = callback(reject);
+        });
+
+        head.appendChild(script);
+
+        return promise;
+      }
+
+      function renderActivities(
+          viewer,
+          activities,
+          incidents,
+      ) {
+          const historic = {};
+          const active = {};
+          const incident = {};
+          const message = {};
+        
+          for (const activity of activities) {
+            const id = activity.activityId;
+            historic[id] = historic[id] ? historic[id] + 1 : 1;
+            if (!activity.endTime) {
+              active[id] = active[id] ? active[id] + 1 : 1;
+            }
+          }
+        
+          for (const incident_ of incidents) {
+            const id = incident_.activityId;
+            active[id] = active[id] ? active[id] + 1 : 1;
+            incident[id] = incident[id] ? incident[id] + 1 : 1;
+            message[id] = message[id]
+              ? `${message[id]}\n${incident_.incidentMessage || ''}`.replace(
+                  /\s+$/g,
+                  ''
+                )
+              : `${incident_.incidentMessage || ''}`.replace(/\s+$/g, '');
+          }
+        
+          const overlays = viewer.get('overlays');
+          const old = overlays.get({ type: 'badge' });
+        
+          for (const id of Object.keys(historic)) {
+            const overlay = document.createElement('span');
+            overlay.innerText = `${historic[id]}`;
+            overlay.className = 'badge';
+            overlay.style.cssText = `
+background: lightgray;
+border: 1px solid #143d52;
+color: #143d52;
+display: inline-block;
+min-width: 10px;
+padding: 3px 7px;
+font-size: 12px;
+font-weight: bold;
+line-height: 1;
+text-align: center;
+white-space: nowrap;
+vertical-align: middle;
+border-radius: 10px;
+        `;
+            overlays.add(id.split('#')[0], 'badge', {
+                position: {
+                bottom: 17,
+                right: 10,
+              },
+              html: overlay,
+            });
+          }
+          for (const id of Object.keys(active)) {
+            const activeOverlay = document.createElement('span');
+            activeOverlay.innerText = `${active[id]}`;
+            activeOverlay.className = 'badge';
+            activeOverlay.style.cssText = `
+background: #70b8db;
+border: 1px solid #143d52;
+color: #143d52;
+display: inline-block;
+min-width: 10px;
+padding: 3px 7px;
+font-size: 12px;
+font-weight: bold;
+line-height: 1;
+text-align: center;
+white-space: nowrap;
+vertical-align: middle;
+border-radius: 10px;
+        `;
+            overlays.add(id.split('#')[0], 'badge', {
+              position: {
+                bottom: 17,
+                left: -10,
+              },
+              html: activeOverlay,
+            });
+          }
+          for (const id of Object.keys(incident)) {
+            if (incident[id]) {
+              const incidentOverlay = document.createElement('span');
+              incidentOverlay.innerText = `${incident[id]}`;
+              incidentOverlay.title = `${message[id]}`;
+              incidentOverlay.className = 'badge';
+              incidentOverlay.style.cssText = `
+background: #b94a48;
+border: 1px solid #140808;
+color: #ffffff;
+display: inline-block;
+min-width: 10px;
+padding: 3px 7px;
+font-size: 12px;
+font-weight: bold;
+line-height: 1;
+text-align: center;
+white-space: nowrap;
+vertical-align: middle;
+border-radius: 10px;
+        `;
+              overlays.add(id.split('#')[0], 'badge', {
+                position: {
+                  bottom: 17,
+                  right: 10,
+                },
+                html: incidentOverlay,
+              });
+            }
+          }
+          for (const overlay of old) {
+            overlays.remove(overlay.id);
+          }
+        };
+    </script>
+  </body>
+</html>
