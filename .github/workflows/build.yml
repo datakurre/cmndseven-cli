@@ -1,11 +1,11 @@
-name: "test"
+name: "build"
 on:
   pull_request:
   push:
     branches:
     - main
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2.4.0
@@ -17,4 +17,6 @@ jobs:
         name: datakurre
         signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
     - run: >
-        nix develop --command make test
+        nix develop --command make test;
+        nix build .;
+        nix run . -- --help
