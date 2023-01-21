@@ -71,7 +71,7 @@ rcc --silent run -- --help
 
 ## Usage with Nix
 
-Also works with Nix, but no binary cache yet:
+Also works with Nix:
 
 ```
 nix run github:datakurre/cmndseven-cli -- --help

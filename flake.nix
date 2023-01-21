@@ -1,5 +1,10 @@
 {
-  description = "Camunda 7 CLI";
+  description = "Opinionated Camunda Platform 7 CLI";
+
+  nixConfig = {
+    extra-trusted-public-keys = "datakurre.cachix.org-1:ayZJTy5BDd8K4PW9uc9LHV+WCsdi/fu1ETIYZMooK78=";
+    extra-substituters = "https://datakurre.cachix.org";
+  };
 
   # Flakes
   inputs.flake-utils.url = "github:numtide/flake-utils";
