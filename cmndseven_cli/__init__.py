@@ -1,17 +1,18 @@
 import base64
-import chameleon  # type: ignore
-import click
-import generic_camunda_client  # type: ignore
 import json
-import os
 import shutil
 import subprocess
 import tempfile
 import time
-from generic_camunda_client.rest import ApiException  # type: ignore
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict
 from typing import List
+
+import chameleon  # type: ignore
+import click
+import generic_camunda_client  # type: ignore
+from click import Context, Argument, Option, Parameter, ParamType
+from generic_camunda_client.rest import ApiException  # type: ignore
 
 ASSETS = [
     Path(__file__).parent / "assets" / "index.js",
@@ -21,23 +22,26 @@ ASSETS = [
 
 NODEJS_EXECUTABLE_PATH = str(shutil.which("node"))
 PUPPETEER_EXECUTABLE_PATH = str(shutil.which("chrome") or shutil.which("chromium"))
-GLOBAL_OPTIONS: Dict[str, str] = {}
+
+
+@dataclass
+class GlobalOptions:
+    """Global API client options."""
+
+    url: str
+    authorization: str = ""
 
 
 class CamundaApiClient(generic_camunda_client.ApiClient):
     """Patched generated client to support authentication."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, options: GlobalOptions, *args, **kwargs):
         """Initialize client with global CLI options."""
 
-        configuration = generic_camunda_client.Configuration(
-            host=GLOBAL_OPTIONS["camunda_url"]
-        )
+        configuration = generic_camunda_client.Configuration(host=options.url)
         super().__init__(configuration, *args, **kwargs)
-        if "camunda_authorization" in GLOBAL_OPTIONS:
-            self.default_headers["Authorization"] = GLOBAL_OPTIONS[
-                "camunda_authorization"
-            ]
+        if options.authorization:
+            self.default_headers["Authorization"] = options.authorization
 
 
 class PlainTextApiClient(CamundaApiClient):
@@ -49,59 +53,108 @@ def data_uri(mimetype: str, data: bytes):
     return "data:{};base64,{}".format(mimetype, base64.b64encode(data).decode("utf-8"))
 
 
-def camunda_url(*_, **kwargs):
-    """Add `--url` header option to set Camunda REST API base URL."""
-
-    def callback(ctx, _, value: str):
-        if not value or ctx.resilient_parsing:
-            return
-        GLOBAL_OPTIONS["camunda_url"] = value
-
-    kwargs.setdefault("help", "Set Camunda REST API base URL (env: CAMUNDA_URL).")
-    kwargs.setdefault("expose_value", False)
-    kwargs.setdefault(
-        "default",
-        lambda: os.environ.get("CAMUNDA_URL", "http://localhost:8080/engine-rest"),
-    )
-    kwargs["callback"] = callback
-    return click.decorators.option("--url", **kwargs)
-
-
-def camunda_authorization(*_, **kwargs):
-    """Add `--authorization` header option to set authorization header on API calls."""
-
-    def callback(ctx, _, value):
-        if not value or ctx.resilient_parsing:
-            return
-        GLOBAL_OPTIONS["camunda_authorization"] = value
-
-    kwargs.setdefault("help", "Set Authorization header (env: CAMUNDA_AUTHORIZATION).")
-    kwargs.setdefault("expose_value", False)
-    kwargs.setdefault("default", lambda: os.environ.get("CAMUNDA_AUTHORIZATION", ""))
-    kwargs["callback"] = callback
-    return click.decorators.option("--authorization", **kwargs)
-
-
 @click.group(help="Camunda Platform 7 CLI")
-@camunda_url()
-@camunda_authorization()
-def main():
+@click.option(
+    "--url",
+    envvar="CAMUNDA_URL",
+    default="http://localhost:8080/engine-rest",
+    help="Set Camunda REST API base URL (env: CAMUNDA_URL).",
+)
+@click.option(
+    "--authorization",
+    envvar="CAMUNDA_AUTHORIZATION",
+    default="",
+    help="Set Authorization header (env: CAMUNDA_AUTHORIZATION).",
+)
+@click.pass_context
+def main(ctx, url, authorization):
+    ctx.obj = GlobalOptions(url=url, authorization=authorization)
+
+
+@main.group(name="complete")
+def complete():
     pass
 
 
-@click.group(name="render")
-@camunda_url()
-@camunda_authorization()
-def render_group():
+def get_global_options(ctx: Context) -> GlobalOptions:
+    if ctx.parent is not None:
+        return get_global_options(ctx.parent)
+    return GlobalOptions(
+        url=ctx.params.get("url") or "",
+        authorization=ctx.params.get("authorization") or "",
+    )
+
+
+def complete_instance_id(ctx: Context, param: Parameter, incomplete: str):
+    options = get_global_options(ctx)
+    incomplete = incomplete.split(":", 1)[0]
+    with CamundaApiClient(options) as api_client:
+        api_instance = generic_camunda_client.ProcessInstanceApi(api_client)
+        instances = api_instance.get_process_instances()
+        matches = [
+            instance
+            for instance in instances
+            if not incomplete or instance.id.startswith(incomplete)
+        ]
+        if matches:
+            return [
+                f"{instance.id}:{instance.definition_id.rsplit(':', 1)[0]}"
+                if len(matches) > 1
+                else instance.id
+                for instance in matches
+            ]
+        instances = api_instance.get_process_instances(
+            process_definition_key=incomplete
+        )
+        matches = [
+            instance
+            for instance in instances
+        ]
+        return [
+            f"{instance.id}:{instance.definition_id.rsplit(':', 1)[0]}"
+            if len(matches) > 1
+            else instance.id
+            for instance in matches
+        ]
+
+
+def complete_task_id(ctx: Context, param: Parameter, incomplete: str):
+    options = get_global_options(ctx)
+    instance_id = ctx.params.get("instance_id") or ""
+    with CamundaApiClient(options) as api_client:
+        api_instance = generic_camunda_client.TaskApi(api_client)
+        tasks = api_instance.get_tasks(process_instance_id=instance_id)
+        return [
+            task.id
+            for task in tasks
+            if not incomplete or task.id.startswith(incomplete)
+        ]
+
+
+@complete.command(name="user-task")
+@click.argument("instance_id", required=False, shell_complete=complete_instance_id)
+@click.argument("task_id", required=False, shell_complete=complete_task_id)
+@click.pass_obj
+def complete_user_task(options: GlobalOptions, instance_id, task_id):
+    with CamundaApiClient(options) as api_client:
+        api_instance = generic_camunda_client.TaskApi(api_client)
+        print(api_instance.get_tasks())
+
+
+@main.group(name="render")
+@click.pass_obj
+def render_group(obj):
     pass
 
 
-@click.command(name="instance")
+@render_group.command(name="instance")
 @click.argument("instance_id")
 @click.argument("output_path", default="-")
-@camunda_url()
-@camunda_authorization()
-def render_instance(instance_id: str, output_path: str):
+@click.pass_obj
+def render_instance(obj, instance_id: str, output_path: str):
+    import pdb
+
+    pdb.set_trace()
     with CamundaApiClient() as api_client:
         api_instance = generic_camunda_client.HistoricProcessInstanceApi(api_client)
         api_definition = generic_camunda_client.ProcessDefinitionApi(api_client)
@@ -195,10 +248,6 @@ def render_instance(instance_id: str, output_path: str):
                 print(html)
             else:
                 Path(output_path).write_text(html)
-
-
-main.add_command(render_group)
-render_group.add_command(render_instance)
 
 
 if __name__ == "__main__":
